@@ -1,11 +1,20 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 import json
 
 # Create your views here.
 
 user = "admin"
 pwd = "123456"
+
+
+def check_login(func):
+    def wrapper(*args, **kwargs):
+        login_state = args[0].session.get('user', None)
+        if not login_state:
+            return redirect("/login/")
+        return func(*args, **kwargs)
+    return wrapper
 
 
 def login(request):
@@ -25,6 +34,7 @@ def login(request):
         if username == user:
             if password == pwd:
                 result["state"] = "success"
+                request.session["user"] = username
                 return HttpResponse(json.dumps(result))
             else:
                 result["msg"] = "密码错误"
@@ -36,6 +46,17 @@ def login(request):
         return render(request, "login.html")
 
 
-def main(request):
-    return render(request, "main.html")
+def logout(request):
+    request.session.delete()
+    return HttpResponse(json.dumps({"state": "success", "msg": "退出成功"}))
+
+
+@check_login
+def content(request):
+
+    # login_state = request.session.get('user',None)
+    login_state = request.session.items
+    return render(request, "content.html", context={"login_state":login_state})
+
+
 
