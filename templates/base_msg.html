@@ -1,0 +1,124 @@
+{% extends "main.html" %}
+
+{% block title %}
+    基本信息
+{% endblock %}
+
+{% block content %}
+    <div>
+        <form class="layui-form" style="width: 45%;margin: 60px auto;" method="post" onsubmit="return post_data()">
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" id="username" placeholder="用户名" autocomplete="off" value="{{ username }}"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">昵称：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="nickname" id="nickname" placeholder="昵称" autocomplete="off" value="{{ nickname }}"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">年龄：</label>
+                <div class="layui-input-block">
+                    <input type="text" name="age" id="age" placeholder="年龄" autocomplete="off" value="{{ age }}"
+                           class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">描述：</label>
+                <div class="layui-input-block">
+                    <textarea name="desc" id="desc" cols="30" rows="4" class="layui-textarea" placeholder="描述"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
+                <div class="layui-input-block">
+                   <span class="layui-btn layui-btn-normal" style="margin-right: 25px;" onclick="change_pwd()">修改密码</span>
+                    <button class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+    layui.use('form', function () {
+        var form = layui.form;
+    });
+    function change_pwd(){
+        layer.open({
+          type: 1,
+          skin: 'layui-layer-rim', //加上边框
+          area: ['600px', '400px'], //宽高
+          content: '<form class="layui-form" style="width: 80%;margin: 50px auto;" method="post" onsubmit="return post_pwd()">\n' +
+              '            <div class="layui-form-item">\n' +
+              '                <label class="layui-form-label">旧密码：</label>\n' +
+              '                <div class="layui-input-block">\n' +
+              '                    <input type="password" name="old_password" id="old_password" placeholder="请输入旧密码" autocomplete="off" value="{{ nickname }}"\n' +
+              '                           class="layui-input">\n' +
+              '                </div>\n' +
+              '            </div>\n' +
+              '            <div class="layui-form-item">\n' +
+              '                <label class="layui-form-label">新密码：</label>\n' +
+              '                <div class="layui-input-block">\n' +
+              '                    <input type="password" name="new_password_1" id="new_password_1" placeholder="请输入新密码" autocomplete="off" value="{{ age }}"\n' +
+              '                           class="layui-input">\n' +
+              '                </div>\n' +
+              '            </div>\n' +
+              '            <div class="layui-form-item">\n' +
+              '                <label class="layui-form-label">新密码：</label>\n' +
+              '                <div class="layui-input-block">\n' +
+              '                    <input type="password" name="new_password_2" id="new_password_2" placeholder="请再次输入新密码" autocomplete="off" value="{{ age }}"\n' +
+              '                           class="layui-input">\n' +
+              '                </div>\n' +
+              '            </div>\n' +
+              '            <div class="layui-form-item" style="margin-top: 30px;margin-left: 60px;">\n' +
+              '                <div class="layui-input-block">\n' +
+              '                    <span class="layui-btn layui-btn-normal" lay-submit lay-filter="*" onclick="post_pwd()">保存密码</span>\n' +
+              '                </div>\n' +
+              '            </div>\n' +
+              '        </form>'
+        });
+    }
+
+    function post_pwd() {
+        var old_password = $("#old_password").val();
+        var new_password_1 = $("#new_password_1").val();
+        var new_password_2 = $("#new_password_2").val();
+        if(!old_password){
+            return layer.msg("请输入旧密码!");
+        }
+        if(new_password_1.length < 8 || new_password_2.length < 8){
+            return layer.msg("新密码长度不能少于8个字符!");
+        }
+        if(new_password_1 !== new_password_2){
+            return layer.msg("两次输入的密码不一致！");
+        }else{
+            $.ajax({
+            type : "POST",
+            url : "/change_pwd",
+            data : {"old_password":old_password, "new_password":new_password_1},
+            success : function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                if(res.state === "success"){
+                    layer.msg("登陆成功，正在跳转到主页");
+                    setTimeout(window.location.href = "/main", 1000);
+                }else{
+                    layer.msg(res.msg);
+                }
+            },
+            error : function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                layer.msg("请求异常，请检查服务器或者本地网络")
+            }
+        });
+        }
+    }
+    </script>
+{% endblock %}
