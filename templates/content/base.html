@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/jquery-3.4.1.js"></script>
+</head>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">layui 后台布局</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="/main">我的主页</a></li>
+            {#            <li class="layui-nav-item"><a href="">商品管理</a></li>#}
+            {#            <li class="layui-nav-item"><a href="">用户</a></li>#}
+            {#            <li class="layui-nav-item">#}
+            {#                <a href="javascript:;">其它系统</a>#}
+            {#                <dl class="layui-nav-child">#}
+            {#                    <dd><a href="">邮件管理</a></dd>#}
+            {#                    <dd><a href="">消息管理</a></dd>#}
+            {#                    <dd><a href="">授权管理</a></dd>#}
+            {#                </dl>#}
+            {#            </li>#}
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="/static/image/Penguins.jpg" class="layui-nav-img layui-anim-rotate">
+                    {{ name }}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/base_msg">个人信息</a></dd>
+                    <dd><a href="">登录设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item layui-anim-up"><a href="javascript:;" onclick="logout()">退了</a></li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+                <li class="layui-nav-item
+                    {% if path == "/network/local_msg" %} layui-nav-itemed {% endif %}
+                    {% if path == "/network/ping" %} layui-nav-itemed {% endif %}
+                    {% if path == "/network/tcp_port" %} layui-nav-itemed {% endif %}
+                    {% if path == "/network/arp_table" %} layui-nav-itemed {% endif %}
+                    {% if path == "/network/packet_capture" %} layui-nav-itemed {% endif %}
+                    ">
+                    <a class="" href="javascript:;">网络工具</a>
+                    <dl class="layui-nav-child">
+                        <dd {% if path == "/network/local_msg" %}class="layui-this"{% endif %}>
+                            <a href="/network/local_msg">本机信息</a>
+                        </dd>
+                        <dd {% if path == "/network/ping" %}class="layui-this"{% endif %}>
+                            <a href="/network/ping">Ping工具</a>
+                        </dd>
+                        <dd {% if path == "/network/tcp_port" %}class="layui-this"{% endif %}>
+                            <a href="/network/tcp_port">Tcp端口检查</a>
+                        </dd>
+                        <dd {% if path == "/network/arp_table" %}class="layui-this"{% endif %}>
+                            <a href="/network/arp_table">ARP表</a>
+                        </dd>
+                        <dd {% if path == "/network/packet_capture" %}class="layui-this"{% endif %}>
+                            <a href="/network/packet_capture">抓包工具</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item
+                {% if path == "/arp/local_area_network" %} layui-nav-itemed {% endif %}
+                {% if path == "/arp/arp_cheat" %} layui-nav-itemed {% endif %}
+                ">
+                    <a href="javascript:;">ARP工具</a>
+                    <dl class="layui-nav-child">
+                        <dd {% if path == "/arp/local_area_network" %}class="layui-this"{% endif %}>
+                            <a href="/arp/local_area_network">域内主机</a>
+                        </dd>
+                        <dd {% if path == "/arp/arp_cheat" %}class="layui-this"{% endif %}>
+                            <a href="/arp/arp_cheat">ARP欺骗</a>
+                        </dd>
+                        <dd><a href="javascript:;">888</a></dd>
+                        <dd><a href="">超链接</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item"><a href="">系统信息</a></li>
+                <li class="layui-nav-item"><a href="">漏洞扫描</a></li>
+                <li class="layui-nav-item"><a href="">操作日志</a></li>
+                <li class="layui-nav-item {% if path == "/demo" %}layui-this{% endif %}"><a href="/demo">demo</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © layui.com - 底部固定区域
+    </div>
+</div>
+
+<script>
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+    layui.use('form', function () {
+        var form = layui.form;
+    });
+
+    function logout() {
+        $.ajax({
+            type: "GET",
+            url: "/logout",
+            success: function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                if (res.state === "success") {
+                    layer.msg(res.msg);
+                    setTimeout(function () {
+                        window.location.href = "/login";
+                    }, 1500);
+                } else {
+                    layer.msg(res.msg);
+                }
+            },
+            error: function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                layer.msg("请求异常，请检查服务器或者本地网络")
+            }
+        });
+    }
+</script>
+
+{% block script %}
+
+{% endblock %}
+
+</body>
+</html>

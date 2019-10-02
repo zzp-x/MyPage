@@ -1,4 +1,4 @@
-{% extends "main.html" %}
+{% extends "content/main.html" %}
 
 {% block title %}
     基本信息
@@ -10,7 +10,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label">用户名：</label>
                 <div class="layui-input-block">
-                    <input type="text" name="username" id="username" placeholder="用户名" autocomplete="off" value="{{ username }}"
+                    <input type="text" name="username" id="username" placeholder="用户名" autocomplete="off" value="{{ username }}" readonly
                            class="layui-input">
                 </div>
             </div>
@@ -31,13 +31,13 @@
             <div class="layui-form-item layui-form-text">
                 <label class="layui-form-label">描述：</label>
                 <div class="layui-input-block">
-                    <textarea name="desc" id="desc" cols="30" rows="4" class="layui-textarea" placeholder="描述"></textarea>
+                    <textarea name="desc" id="desc" cols="30" rows="4" class="layui-textarea" placeholder="描述">{{ desc }}</textarea>
                 </div>
             </div>
             <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
                 <div class="layui-input-block">
                    <span class="layui-btn layui-btn-normal" style="margin-right: 25px;" onclick="change_pwd()">修改密码</span>
-                    <button class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;">保存</button>
+                    <span class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;" onclick="change_user()">保存</span>
                 </div>
             </div>
         </form>
@@ -46,9 +46,6 @@
 
 {% block script %}
     <script>
-    layui.use('form', function () {
-        var form = layui.form;
-    });
     function change_pwd(){
         layer.open({
           type: 1,
@@ -58,21 +55,21 @@
               '            <div class="layui-form-item">\n' +
               '                <label class="layui-form-label">旧密码：</label>\n' +
               '                <div class="layui-input-block">\n' +
-              '                    <input type="password" name="old_password" id="old_password" placeholder="请输入旧密码" autocomplete="off" value="{{ nickname }}"\n' +
+              '                    <input type="password" name="old_password" id="old_password" placeholder="请输入旧密码" autocomplete="off"\n' +
               '                           class="layui-input">\n' +
               '                </div>\n' +
               '            </div>\n' +
               '            <div class="layui-form-item">\n' +
               '                <label class="layui-form-label">新密码：</label>\n' +
               '                <div class="layui-input-block">\n' +
-              '                    <input type="password" name="new_password_1" id="new_password_1" placeholder="请输入新密码" autocomplete="off" value="{{ age }}"\n' +
+              '                    <input type="password" name="new_password_1" id="new_password_1" placeholder="请输入新密码" autocomplete="off"\n' +
               '                           class="layui-input">\n' +
               '                </div>\n' +
               '            </div>\n' +
               '            <div class="layui-form-item">\n' +
               '                <label class="layui-form-label">新密码：</label>\n' +
               '                <div class="layui-input-block">\n' +
-              '                    <input type="password" name="new_password_2" id="new_password_2" placeholder="请再次输入新密码" autocomplete="off" value="{{ age }}"\n' +
+              '                    <input type="password" name="new_password_2" id="new_password_2" placeholder="请再次输入新密码" autocomplete="off"\n' +
               '                           class="layui-input">\n' +
               '                </div>\n' +
               '            </div>\n' +
@@ -106,8 +103,10 @@
                 res = JSON.parse(result);
                 console.log(res);
                 if(res.state === "success"){
-                    layer.msg("登陆成功，正在跳转到主页");
-                    setTimeout(window.location.href = "/main", 1000);
+                    layer.msg(res.msg);
+                    setTimeout(function () {
+                        window.location.href = "/login";
+                    }, 3000);
                 }else{
                     layer.msg(res.msg);
                 }
@@ -119,6 +118,32 @@
             }
         });
         }
+    }
+
+    function change_user() {
+        var nickname = $("#nickname").val();
+        var age = $("#age").val();
+        var desc = $("#desc").val();
+
+        $.ajax({
+            type : "POST",
+            url : "/change_user",
+            data : {"nickname":nickname, "age":age, "desc":desc},
+            success : function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                if(res.state === "success"){
+                    layer.msg(res.msg);
+                }else{
+                    layer.msg(res.msg);
+                }
+            },
+            error : function (result) {
+                res = JSON.parse(result);
+                console.log(res);
+                layer.msg("请求异常，请检查服务器或者本地网络")
+            }
+        });
     }
     </script>
 {% endblock %}

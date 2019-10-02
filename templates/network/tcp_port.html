@@ -1,0 +1,77 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    网络工具
+{% endblock %}
+
+{% block content %}
+    <form class="layui-form" style="width: 60%;margin: 50px auto;" method="post" onsubmit="return post_tcp_port()">
+        <div class="layui-form-item">
+            <label class="layui-form-label">目标地址：</label>
+            <div class="layui-input-block">
+                <input type="text" name="ip" id="ip" placeholder="请输入目标地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">目标端口：</label>
+            <div class="layui-input-block">
+                <input type="text" name="port" id="port" placeholder="请输入目标端口, 参考格式：22-30 OR 22, 23, 25" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">结果：</label>
+            <div class="layui-input-block">
+                <textarea name="desc" id="result" cols="30" rows="4" class="layui-textarea" readonly
+                          placeholder="返回结果"></textarea>
+            </div>
+        </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;">确认</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $("#ip").val("192.168.");
+
+        function post_tcp_port() {
+            var ip = $("#ip").val();
+            if (ip === "") {
+                layer.msg("请输入IP地址！");
+                return false;
+            }
+            var port = $("#port").val();
+            if (port === "") {
+                layer.msg("请输入目标端口！");
+                return false;
+            }
+            var index = layer.load(2, {time: 20 * 1000});
+            $.ajax({
+                type: "POST",
+                url: "/network/tcp_port",
+                data: {"ip": ip, "port": port},
+                success: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    if (res.state === "success") {
+                        $("#result").text(res.msg);
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                    layer.close(index);
+                },
+                error: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    layer.msg("请求异常，请检查服务器或者本地网络");
+                    layer.close(index);
+                }
+            });
+            return false;
+        }
+    </script>
+{% endblock %}

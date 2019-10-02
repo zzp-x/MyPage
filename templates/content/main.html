@@ -1,0 +1,42 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    主页
+{% endblock %}
+
+{% block content %}
+    <div class="layui-container" style="width: 80%;margin:">
+        <div>该平台是一个集成笔记记录，网络工具，ARP欺骗等的网站</div>
+        <div>运行程序，首先要确认安装了 scapy， 系统为 windows7 / 10, Python 3 版本</div>
+        <div>
+            <div>1.完成 arp 欺骗的模块，包括多个目标ip，开始暂停线程</div>
+            <div>2.添加验证码认证登陆</div>
+            <div>3.添加登陆认证，确认是否开启登陆认证</div>
+        </div>
+        <div style="margin: 50px auto;">
+            <div class="layui-progress layui-progress-big" lay-filter="demo" lay-showPercent="true">
+                <div class="layui-progress-bar" lay-percent="0%"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        layui.use('element', function () {
+            element = layui.element;
+            element.progress('demo', '0%');
+        });
+        var clock_int = self.setInterval("clock()", 1000);
+        var i = 0;
+
+        function clock() {
+            i++;
+            element.progress('demo', i + '%');
+            if (i >= 100) {
+                window.clearInterval(clock_int);
+                layer.msg("进度条走完了！！")
+            }
+        }
+    </script>
+{% endblock %}

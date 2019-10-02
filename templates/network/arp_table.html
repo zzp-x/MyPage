@@ -1,0 +1,29 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    网络工具
+{% endblock %}
+
+{% block content %}
+    {% for arp in arp_list %}
+        <div class="layui-elem-quote" style="width: 80%; margin: 0 auto;background-color: white;padding-left: 20px;">接口：{{ arp.interface }}</div>
+        <table class="layui-table" style="width: 80%; margin: 0 auto;">
+            <thead>
+            <tr>
+                <th>IP</th>
+                <th>MAC</th>
+                <th>类型</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ips in arp.ips %}
+                <tr>
+                    <td>{{ ips.ip }}</td>
+                    <td>{{ ips.mac }}</td>
+                    <td>{{ ips.type }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% endblock %}

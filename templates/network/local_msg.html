@@ -1,0 +1,141 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    网络工具
+{% endblock %}
+
+{% block content %}
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">本地系统</li>
+            <li>本地网络</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <table class="layui-table" style="display: inline-block;">
+                    <colgroup>
+                        <col width="150">
+                        <col width="150">
+                        <col width="250">
+                        <col width="150">
+                        <col width="150">
+                        <col width="250">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th style="text-align: center;">版本</th>
+                        <th style="text-align: center;">介绍</th>
+                        <th style="text-align: center;">详细</th>
+                        <th style="text-align: center;">版本</th>
+                        <th style="text-align: center;">介绍</th>
+                        <th style="text-align: center;">详细</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td rowspan="5" style="text-align: center;">系统信息</td>
+                        <td style="text-align: center;">系统名及版本号</td>
+                        <td style="text-align: center;">{{ platform_msg.platform }}</td>
+                        <td rowspan="5" style="text-align: center;">Python 版本</td>
+                        <td style="text-align: center;">编译器类型</td>
+                        <td style="text-align: center;">{{ python_msg.implementation }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">系统位数</td>
+                        <td style="text-align: center;">{{ platform_msg.architecture }}</td>
+                        <td style="text-align: center;">编译器版本</td>
+                        <td style="text-align: center;">{{ python_msg.version }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">计算机类型</td>
+                        <td style="text-align: center;">{{ platform_msg.machine }}</td>
+                        <td style="text-align: center;">分支版本</td>
+                        <td style="text-align: center;">{% if python_msg.branch %}
+                            {{ python_msg.branch }}
+                        {% else %}
+                            无
+                        {% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">网络名称</td>
+                        <td style="text-align: center;">{{ platform_msg.node }}</td>
+                        <td style="text-align: center;">构建</td>
+                        <td style="text-align: center;">{{ python_msg.build }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">处理器</td>
+                        <td style="text-align: center;">{{ platform_msg.processor }}</td>
+                        <td style="text-align: center;">编译者</td>
+                        <td style="text-align: center;">{{ python_msg.compiler }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="layui-form">
+                    <div class="layui-form-item layui-row">
+                        <label class="layui-form-label" style="width: 250px;margin-left: -40px;">系统时间：&nbsp;<span class="layui-text" id="system_time">{{ system_time }}</span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-tab-item">
+                <table class="layui-table">
+                    <colgroup>
+                        <col width="300">
+                        <col width="160">
+                        <col>
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th style="text-align: center">网卡名称</th>
+                        <th style="text-align: center">MAC地址</th>
+                        <th style="text-align: center">IP地址</th>
+                        <th style="text-align: center">网关</th>
+                        <th style="text-align: center">子网掩码</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for foo in ipconfig_list %}
+                        <tr>
+                            <td style="text-align: center">{{ foo.name }}</td>
+                            <td style="text-align: center">
+                                {% if foo.mac %}
+                                    {{ foo.mac }}
+                                {% else %}
+                                    无
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center">{% if foo.ip4 %}
+                                {% for ip in foo.ip4 %}
+                                    {{ ip }}
+                                {% endfor %}
+                            {% else %}
+                                无
+                            {% endif %}</td>
+                            <td style="text-align: center">
+                                {% if foo.gateway %}
+                                    {{ foo.gateway }}
+                                {% else %}
+                                    无
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center">
+                                {% if foo.subnet %}
+                                    {{ foo.subnet }}
+                                {% else %}
+                                    无
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+    </script>
+{% endblock %}

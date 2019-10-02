@@ -1,0 +1,122 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    网络工具
+{% endblock %}
+
+{% block content %}
+    <div class="layui-tab-content">
+    <div class="layui-tab-item layui-show">
+        <form class="layui-form" action="" style="width: 50%; margin: 50px auto">
+            <div class="layui-form-item">
+                <label class="layui-form-label">网卡</label>
+                <div class="layui-input-block">
+                    <select name="net_ka" lay-verify="required" id="net_ka">
+                        <option value="any">全部</option>
+                        {% for foo in net_kas %}
+                            <option value="{{ foo }}">{{ foo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">抓包数量</label>
+                <div class="layui-input-block">
+                    <select name="count" lay-verify="required" id="count">
+                        <option value="100">100</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="2000">2000</option>
+                        <option value="3000">3000</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">开关</label>
+                <div class="layui-input-inline">
+                    <input type="checkbox" name="switch" lay-skin="switch" id="switch">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="margin-left: -80px;
+                        {% if not download %}
+                            display: none;
+                        {% endif %}
+                        " id="download">
+                    之前抓包文件：<a href="/network/download_packet" style="color: blue;">sniff.pcap</a>
+                    <i class="layui-icon layui-icon-close"
+                       style="font-size: 20px; color: red;padding-left: 10px;padding-top:10px;cursor: pointer;"
+                       onclick="packet_del()" title="是否删除"></i>
+                </div>
+            </div>
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">确认</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+        layui.use('form', function () {
+            var form = layui.form;
+
+            form.on('submit(formDemo)', function (data) {
+                if (data.field["switch"] !== "on") {
+                    layer.msg("请打开抓包开关！");
+                    return false;
+                }
+                var index = layer.load(2, {time: 60 * 1000});
+                $.ajax({
+                    type: "POST",
+                    url: "/network/packet_capture",
+                    data: {"net_ka": $("#net_ka").val(), "count": $("#count").val(), "switch": $("#switch").val()},
+                    success: function (result) {
+                        res = JSON.parse(result);
+                        console.log(res);
+                        if (res.state === "success") {
+                            layer.msg(res.msg);
+                            $("#download").show();
+                        } else {
+                            layer.msg(res.msg);
+                        }
+                        layer.close(index);
+                    },
+                    error: function (result) {
+                        console.log(result);
+                        layer.msg("请求异常，请检查服务器或者本地网络");
+                        layer.close(index);
+                    }
+                });
+                return false;
+            });
+        });
+
+        function packet_del() {
+            var index = layer.load(2, {time: 60 * 1000});
+            $.ajax({
+                type: "GET",
+                url: "/network/download_packet_del",
+                success: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    if (res.state === "success") {
+                        layer.msg(res.msg);
+                        $("#download").hide();
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                    layer.close(index);
+                },
+                error: function (result) {
+                    console.log(result);
+                    layer.msg("请求异常，请检查服务器或者本地网络");
+                    layer.close(index);
+                }
+            });
+        }
+    </script>
+{% endblock %}

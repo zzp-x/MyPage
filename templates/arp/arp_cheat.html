@@ -1,0 +1,117 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    ARP 工具
+{% endblock %}
+
+{% block content %}
+    <form class="layui-form" style="width: 60%;margin: 50px auto;" method="post" onsubmit="return post_ping()">
+        <div class="layui-form-item">
+            <label class="layui-form-label">网卡：</label>
+            <div class="layui-input-block">
+                <select name="network_card" lay-verify="required" id="network_card" lay-filter="network_card">
+                    {% for msg in ipconfig_list %}
+                        <option value="{{ msg.name }}">{{ msg.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="width: 45%;display: inline-block;">
+            <label class="layui-form-label">网关 IP：</label>
+            <div class="layui-input-block">
+                <input type="text" name="gateway_ip" id="gateway_ip" placeholder="请输入网关IP地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="width: 45%;display: inline-block;margin-left: 30px;">
+            <label class="layui-form-label">网关 MAC：</label>
+            <div class="layui-input-block">
+                <input type="text" name="gateway_mac" id="gateway_mac" placeholder="请输入MAC地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item" style="width: 90%;">
+            <label class="layui-form-label">目标地址：</label>
+            <div class="layui-input-block">
+                <input type="text" name="target_ip[]" id="target_ip" placeholder="请输入目标IP地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">结果：</label>
+            <div class="layui-input-block">
+        <textarea name="desc" id="desc" cols="60" rows="12" class="layui-textarea" placeholder="返回结果" readonly></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;">确认</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+    var ipconfig_list = "{{ ipconfig_list_json }}";
+    ipconfig_list = ipconfig_list.split("&quot;").join('"');
+    ipconfig_list = JSON.parse(ipconfig_list);
+    layui.use('form', function(){
+        var form = layui.form;
+        form.on('select(network_card)', function(data){
+            console.log(data.value); //得到被选中的值
+            for(var i=0; i<ipconfig_list.length; i++){
+                if(ipconfig_list[i]["name"] === data.value){
+                    var ip4 = ipconfig_list[i]["ip4"][0];
+                    if(ip4 !== undefined){
+                        ip4 = ip4.replace("(首选)", "");
+                    }else{
+                        ip4 = "0.0.0.0";
+                    }
+                    $("#gateway_ip").val(ip4);
+                    var ip_header = "";
+                    if(ip4 !== "0.0.0.0"){
+                        ip_header = ip4.split(".")[0] + "." + ip4.split(".")[1] + "."
+                    }
+                    $("#target_ip").val(ip_header);
+                    $("#gateway_mac").val(ipconfig_list[i]["mac"]);
+                }
+            }
+        });
+    });
+
+
+        function post_ping() {
+            var ip = $("#ip").val();
+            if (ip === "") {
+                layer.msg("请输入IP地址！");
+                return false;
+            }
+            var times = $("#times").val();
+            if (times === "") {
+                layer.msg("必须为选项 -n 提供值。");
+                return false;
+            }
+            var index = layer.load(2, {time: 20 * 1000});
+            $.ajax({
+                type: "POST",
+                url: "/network/ping",
+                data: {"ip": ip, "times": times},
+                success: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    if (res.state === "success") {
+                        $("#desc").val(res.msg);
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                    layer.close(index);
+                },
+                error: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    layer.msg("请求异常，请检查服务器或者本地网络");
+                    layer.close(index);
+                }
+            });
+            return false;
+        }
+    </script>
+{% endblock %}

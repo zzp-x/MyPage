@@ -1,0 +1,81 @@
+{% extends 'content/base.html' %}
+
+{% block title %}
+    网络工具
+{% endblock %}
+
+{% block content %}
+    <form class="layui-form" style="width: 60%;margin: 50px auto;" method="post" onsubmit="return post_ping()">
+        <div class="layui-form-item">
+            <label class="layui-form-label">目标地址：</label>
+            <div class="layui-input-block">
+                <input type="text" name="ip" id="ip" placeholder="请输入目标地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+        <label class="layui-form-label">Ping次数：</label>
+        <div class="layui-input-block">
+            <select name="times" lay-verify="required" id="times">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+    </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">结果：</label>
+            <div class="layui-input-block">
+                <textarea name="desc" id="desc" cols="60" rows="12" class="layui-textarea" placeholder="返回结果"
+                          readonly></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" style="text-align: center; margin-top: 30px;">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="*" style="margin-right: 15px;">确认</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+    $("#ip").val("192.168.");
+        function post_ping() {
+            var ip = $("#ip").val();
+            if (ip === "") {
+                layer.msg("请输入IP地址！");
+                return false;
+            }
+            var times = $("#times").val();
+            if (times === "") {
+                layer.msg("必须为选项 -n 提供值。");
+                return false;
+            }
+            var index = layer.load(2, {time: 20 * 1000});
+            $.ajax({
+                type: "POST",
+                url: "/network/ping",
+                data: {"ip": ip, "times": times},
+                success: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    if (res.state === "success") {
+                        $("#desc").val(res.msg);
+                    } else {
+                        layer.msg(res.msg);
+                    }
+                    layer.close(index);
+                },
+                error: function (result) {
+                    res = JSON.parse(result);
+                    console.log(res);
+                    layer.msg("请求异常，请检查服务器或者本地网络");
+                    layer.close(index);
+                }
+            });
+            return false;
+        }
+    </script>
+{% endblock %}
